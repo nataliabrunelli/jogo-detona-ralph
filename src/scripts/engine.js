@@ -13,6 +13,7 @@ const state = {
     result: 0,
     currentTime: 60,
     livesLeft: 10,
+    gameActive: true,
   },
 
   actions: {
@@ -36,27 +37,32 @@ function randomSquare() {
 function addListenerHitBox() {
   state.view.square.forEach((square) => {
     square.addEventListener("mousedown", () => {
+      if (!state.values.gameActive) return;
+
       if (square.id === state.values.hitPosition) {
         state.values.result++;
         state.view.score.textContent = state.values.result;
         state.values.hitPosition = null;
         playSound("hit");
-      }
-      else {
+      } else {
         state.values.livesLeft--;
         state.view.lives.textContent = state.values.livesLeft;
         state.values.hitPosition = null;
       }
+
+      if (state.values.livesLeft <= 0) {
+        state.values.gameActive = false;
+      }
     });
   });
 }
-
 
 function countDown() {
   state.values.currentTime--;
   state.view.timeLeft.textContent = state.values.currentTime;
 
   if (state.values.currentTime === 0 || state.values.livesLeft === 0) {
+    state.values.gameActive = false;
     alert(`GAME OVER! A sua pontuação foi: ${state.values.result}`);
     clearInterval(state.actions.timerId);
     clearInterval(state.actions.countDownTimerId);
@@ -65,7 +71,7 @@ function countDown() {
 
 function playSound(audioName) {
   let audio = new Audio(`./src/audios/${audioName}.m4a`);
-  audio.volume = 0.2;
+  audio.volume = 0.1;
   audio.play();
 }
 
